@@ -1,12 +1,15 @@
-// Declare that we have a lexer module (this tells main.rs that lexer.rs exists)
+// We now have three modules: ast, lexer, and parser
+mod ast;
 mod lexer;
+mod parser;
 
-// Bring our Token enum and the new Lexer struct into scope
+// Bring our tools into scope
 use lexer::Lexer;
-use crate::Token::{EndOfFile, Identifier, Say, Text};
+use parser::Parser;
+use crate::Token::{EndOfFile, Identifier, Say, Text, Number, Equals, Plus, LessThan, Create, Loop, If};
 
-// This enum represents all the "words" our language understands.
-#[derive(Debug, PartialEq)] // Added PartialEq for easier testing later
+
+#[derive(Debug, PartialEq, Clone)] // We need Clone now for the parser
 pub enum Token {
     // Keywords
     Say,
@@ -29,21 +32,21 @@ pub enum Token {
 }
 
 fn main() {
-    println!("--- Running Trace Lexer ---");
+    println!("--- Running Trace Parser ---");
 
-    // This is our first line of Trace code!
-    let source_code = String::from("say \"Hello, Trace! This is working!\"");
+    // Our line of Trace code
+    let source_code = String::from("say \"Hello from the Parser!\"");
 
-    // Create a new lexer with our source code.
-    let mut lexer = Lexer::new(source_code);
+    // 1. Create the Lexer
+    let lexer = Lexer::new(source_code);
 
-    // Loop until we get the EndOfFile token.
-    loop {
-        let token = lexer.next_token();
-        println!("{:?}", token); // Print the token we found
+    // 2. Create the Parser
+    let mut parser = Parser::new(lexer);
 
-        if token == EndOfFile {
-            break; // Stop the loop
-        }
-    }
+    // 3. Parse the program to build the AST
+    let program = parser.parse_program();
+
+    // 4. Print the result!
+    println!("Successfully parsed program:");
+    println!("{:#?}", program); // The {:#?} makes the printout pretty
 }

@@ -1,30 +1,49 @@
+// Declare that we have a lexer module (this tells main.rs that lexer.rs exists)
+mod lexer;
+
+// Bring our Token enum and the new Lexer struct into scope
+use lexer::Lexer;
+use crate::Token::{EndOfFile, Identifier, Say, Text};
+
 // This enum represents all the "words" our language understands.
-// We'll add more to this list as our language grows.
-#[derive(Debug)] // This lets us print the tokens for testing
-enum Token {
+#[derive(Debug, PartialEq)] // Added PartialEq for easier testing later
+pub enum Token {
     // Keywords
-    Say,          // for the "say" command
-    Create,       // for the "create" command
-    Loop,         // for the "loop" command
-    If,           // for the "if" command
+    Say,
+    Create,
+    Loop,
+    If,
 
     // Identifiers and Literals
-    Identifier(String), // for variable names like "player_guess"
-    Text(String),       // for strings in double quotes like "Hello, World!"
-    Number(f64),        // for numbers like 100 or 3.14
+    Identifier(String),
+    Text(String),
+    Number(f64),
 
     // Operators and Symbols
-    Equals,       // for the = sign
-    Plus,         // for the + sign
-    LessThan,     // for the < sign
+    Equals,
+    Plus,
+    LessThan,
 
     // A special token to mark the end of the code
     EndOfFile,
 }
 
 fn main() {
-    // For now, our main function is empty.
-    // We'll add code here later to actually *use* our tokens.
-    println!("Trace language token definitions are ready!");
-    println!("Next step will be to build the lexer to create these tokens from code.");
+    println!("--- Running Trace Lexer ---");
+
+    // This is our first line of Trace code!
+    let source_code = String::from("say \"Hello, Trace! This is working!\"");
+
+    // Create a new lexer with our source code.
+    let mut lexer = Lexer::new(source_code);
+
+    // Loop until we get the EndOfFile token.
+    loop {
+        let token = lexer.next_token();
+        println!("{:?}", token); // Print the token we found
+
+        if token == EndOfFile {
+            break; // Stop the loop
+        }
+    }
 }

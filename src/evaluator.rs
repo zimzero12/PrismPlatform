@@ -1,32 +1,46 @@
-// We need to know about the structures we're going to evaluate.
-use crate::ast::{Program, Statement};
+// in src/evaluator.rs
 
-// The Evaluator struct. For now, it doesn't need to hold any data.
-pub struct Evaluator;
+use crate::ast::{Expression, Program, Statement};
+use std::collections::HashMap; // Import HashMap!
+
+// The environment holds our variables. It's a map from a string (name) to a value (f64).
+type Environment = HashMap<String, f64>;
+
+pub struct Evaluator {
+    environment: Environment,
+}
 
 impl Evaluator {
-    // A function to create a new Evaluator.
     pub fn new() -> Self {
-        Evaluator
+        Evaluator {
+            environment: HashMap::new(),
+        }
     }
 
-    // This is the main entry point. It takes a whole program (the AST) and evaluates it.
-    pub fn eval_program(&self, program: &Program) {
-        // We simply loop through all the statements in the program and evaluate them one by one.
+    pub fn eval_program(&mut self, program: &Program) {
         for statement in &program.statements {
             self.eval_statement(statement);
         }
     }
 
-    // This function handles individual statements.
-    fn eval_statement(&self, statement: &Statement) {
-        // We use a match statement to determine what kind of statement we're looking at.
+    fn eval_statement(&mut self, statement: &Statement) {
         match statement {
-            // If we find a SayStatement...
             Statement::SayStatement { value } => {
-                // ...we simply print its value to the console! This is the magic.
                 println!("{}", value);
             }
+            Statement::CreateStatement { name, value } => {
+                // When we see a create statement...
+                let value_to_store = self.eval_expression(value);
+                // ...we insert the variable's name and its evaluated value into our environment!
+                self.environment.insert(name.clone(), value_to_store);
+            }
+        }
+    }
+
+    // NEW FUNCTION to evaluate expressions and get their concrete value
+    fn eval_expression(&self, expression: &Expression) -> f64 {
+        match expression {
+            Expression::NumberLiteral(value) => *value,
         }
     }
 }

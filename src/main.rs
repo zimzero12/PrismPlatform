@@ -10,21 +10,23 @@ use parser::Parser;
 use crate::Token::{EndOfFile, Identifier, Say, Text, Number, Equals, Plus, LessThan, Create, Loop, If};
 
 
+// in src/main.rs
+
 #[derive(Debug, PartialEq, Clone)]
 pub enum Token {
     // Keywords
     Say,
-    Create,
+    Create, // <-- ADDED
     Loop,
     If,
 
     // Identifiers and Literals
     Identifier(String),
     Text(String),
-    Number(f64),
+    Number(f64), // <-- ADDED (was already here, but make sure!)
 
     // Operators and Symbols
-    Equals,
+    Equals, // <-- ADDED
     Plus,
     LessThan,
 
@@ -32,20 +34,22 @@ pub enum Token {
     EndOfFile,
 }
 
+// in src/main.rs (at the bottom)
+
 fn main() {
-    println!("--- Running Trace Language ---");
+    println!("--- Running Trace Language v0.2 ---");
 
-    // Let's give it a real program to run!
-    let source_code = String::from("say \"Trace is now a real, functional language!\"");
+    // Our new program using variables!
+    let source_code = String::from("create score = 100");
 
-    // 1. Lexer: Turn the code into tokens (words).
     let lexer = Lexer::new(source_code);
-
-    // 2. Parser: Turn the tokens into an AST (sentences).
     let mut parser = Parser::new(lexer);
     let program = parser.parse_program();
 
-    // 3. Evaluator: Take the AST and execute it!
-    let evaluator = Evaluator::new();
+    // We need a mutable evaluator now since it stores variables
+    let mut evaluator = Evaluator::new();
     evaluator.eval_program(&program);
+
+    // We can't see the result yet, but if this runs without crashing, it worked!
+    println!("Program finished. Variable 'score' should now be stored.");
 }

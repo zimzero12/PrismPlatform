@@ -1,4 +1,6 @@
-use crate::ast::{Program, Statement};
+// in src/parser.rs
+
+use crate::ast::{Expression, Program, Statement};
 use crate::lexer::Lexer;
 use crate::Token;
 
@@ -11,54 +13,85 @@ impl Parser {
     pub fn new(lexer: Lexer) -> Self {
         let mut parser = Parser {
             lexer,
-            current_token: Token::EndOfFile, // Placeholder
+            current_token: Token::EndOfFile,
         };
-        // Load the first token to get started.
         parser.next_token();
         parser
     }
 
-    // A helper function to advance to the next token from the lexer.
     fn next_token(&mut self) {
         self.current_token = self.lexer.next_token();
     }
 
-    // The main function of the parser. It builds the entire AST.
     pub fn parse_program(&mut self) -> Program {
         let mut program = Program {
             statements: Vec::new(),
         };
 
-        // Loop through all the tokens until we reach the end.
         while self.current_token != Token::EndOfFile {
             if let Some(statement) = self.parse_statement() {
                 program.statements.push(statement);
             }
             self.next_token();
         }
-
         program
     }
 
-    // This function figures out what kind of statement we're looking at.
     fn parse_statement(&mut self) -> Option<Statement> {
         match self.current_token {
             Token::Say => self.parse_say_statement(),
-            _ => None, // If we don't recognize it, we ignore it for now.
+            Token::Create => self.parse_create_statement(), // <-- ADDED
+            _ => None,
         }
     }
 
-    // This handles the grammar for a "say" statement.
-    // It expects the current token to be 'Say' and the next to be 'Text'.
     fn parse_say_statement(&mut self) -> Option<Statement> {
-        self.next_token(); // Move from 'say' to the next token
-
+        self.next_token();
         if let Token::Text(value) = &self.current_token {
             Some(Statement::SayStatement {
                 value: value.clone(),
             })
         } else {
-            // If the token after 'say' is not Text, it's a grammar error.
+            None
+        }
+    }
+
+    // NEW FUNCTION to parse "create" statements
+    fn parse_create_statement(&mut self) -> Option<Statement> {
+        self.next_token(); // Move past 'create'
+
+        let variable_name = if let Token::Identifier(name) = &self.current_token {
+            name.clone()
+        } else {
+            return None; // Grammar error: expected a variable name
+        };
+
+        self.next_token(); // Move past the name
+
+        if self.current_token != Token::Equals {
+            return None; // Grammar error: expected '='
+        }
+
+        self.next_token(); // Move past '='
+
+        let value = self.parse_expression()?; // Parse the value on the right side
+
+        Some(Statement::CreateStatement { name: variable_name, value })
+    }
+
+    // NEW FUNCTION to parse any kind of value/expression
+    fn parse_expression(&mut self) -> Option<Expression> {
+        match &self.current_token {
+            Token::Number(_) => self.parse_number_literal(),
+            _ => None, // We only support numbers for now
+        }
+    }
+
+    // NEW FUNCTION specifically for parsing numbers
+    fn parse_number_literal(&mut self) -> Option<Expression> {
+        if let Token::Number(value) = self.current_token {
+            Some(Expression::NumberLiteral(value))
+        } else {
             None
         }
     }

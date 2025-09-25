@@ -1,13 +1,23 @@
-// The core building block of our AST. For now, a program is just a list of statements.
+// in src/ast.rs
+
 #[derive(Debug)]
 pub struct Program {
     pub statements: Vec<Statement>,
 }
 
-// This enum represents all the different kinds of statements our language can have.
-// Right now, it only has one: a "say" statement.
+// Represents a value or computation
+#[derive(Debug)]
+pub enum Expression {
+    NumberLiteral(f64),
+    // We'll add TextLiteral, Identifier, etc. here later
+}
+
+// Represents an action or command
 #[derive(Debug)]
 pub enum Statement {
-    SayStatement { value: String }, // e.g., say "this is the value"
-    // We will add LetStatement, IfStatement, etc. here later.
+    SayStatement { value: String },
+    CreateStatement { // <-- ADDED
+        name: String,
+        value: Expression,
+    },
 }

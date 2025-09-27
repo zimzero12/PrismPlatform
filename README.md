@@ -42,9 +42,10 @@ This project is **not a product**. It is a **public learning log**, a **demonstr
 Install the Rust toolchain using `rustup` (the official Rust installer):
 
 ```sh
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs
+```
 
-💡 On Windows? Download and run rustup-init.exe instead.
+> ** 💡 On Windows? Download and run rustup-init.exe instead.
 Ensure your PATH includes ~/.cargo/bin (or %USERPROFILE%\.cargo\bin on Windows).
 
 ## Running Trace
@@ -52,15 +53,18 @@ Ensure your PATH includes ~/.cargo/bin (or %USERPROFILE%\.cargo\bin on Windows).
 ### Clone the repositories
 ```sh
 git clone https://github.com/zimzero12/PrismPlatform.git
-cd PrismPlatform | sh
+cd PrismPlatform
+```
 
 ### Run the REPL
 ```sh
-cargo run | sh
+cargo run
+```
 
 ### Execute a script
 ```sh
-cargo run -- your_script.trace | sh
+cargo run -- your_script.trace
+```
 
 Warning: Trace is not stable. Breaking changes are expected weekly. 
 

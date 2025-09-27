@@ -1,14 +1,15 @@
+// in src/evaluator.rs
+
 use crate::ast::{Expression, Program, Statement};
+use crate::error::{EvalError, TraceResult}; // <-- ADDED
 use std::collections::HashMap;
 
-// An enum to represent the different types of values in Trace.
 #[derive(Debug, Clone)]
 pub enum TraceValue {
     Number(f64),
     Text(String),
 }
 
-// The environment now stores our new TraceValue type.
 type Environment = HashMap<String, TraceValue>;
 
 pub struct Evaluator {
@@ -22,42 +23,42 @@ impl Evaluator {
         }
     }
 
-    pub fn eval_program(&mut self, program: &Program) {
+    // eval_program now returns a Result
+    pub fn eval_program(&mut self, program: &Program) -> TraceResult<()> {
         for statement in &program.statements {
-            self.eval_statement(statement);
+            self.eval_statement(statement)?; // Propagate errors with '?'
         }
+        Ok(())
     }
 
-    fn eval_statement(&mut self, statement: &Statement) {
+    // eval_statement now returns a Result
+    fn eval_statement(&mut self, statement: &Statement) -> TraceResult<()> {
         match statement {
             Statement::CreateStatement { name, value } => {
-                let value_to_store = self.eval_expression(value);
+                let value_to_store = self.eval_expression(value)?;
                 self.environment.insert(name.clone(), value_to_store);
             }
             Statement::SayStatement { value } => {
-                // First, evaluate the expression to get a concrete value.
-                let value_to_print = self.eval_expression(value);
-                // Now, print that value based on its type.
+                let value_to_print = self.eval_expression(value)?;
                 match value_to_print {
                     TraceValue::Number(n) => println!("{}", n),
                     TraceValue::Text(t) => println!("{}", t),
                 }
             }
         }
+        Ok(())
     }
 
-    fn eval_expression(&self, expression: &Expression) -> TraceValue {
+    // eval_expression now returns a Result
+    fn eval_expression(&self, expression: &Expression) -> TraceResult<TraceValue> {
         match expression {
-            Expression::NumberLiteral(value) => TraceValue::Number(*value),
-            Expression::TextLiteral(value) => TraceValue::Text(value.clone()),
+            Expression::NumberLiteral(value) => Ok(TraceValue::Number(*value)),
+            Expression::TextLiteral(value) => Ok(TraceValue::Text(value.clone())),
             Expression::Identifier(name) => {
                 match self.environment.get(name) {
-                    Some(value) => value.clone(), // Return the found value
-                    None => {
-                        // If the variable isn't found, print an error and return a default value.
-                        println!("Error: Variable '{}' not found.", name);
-                        TraceValue::Text(String::from("undefined"))
-                    }
+                    Some(value) => Ok(value.clone()),
+                    // THIS IS THE CRITICAL FIX: We now return a proper, structured error.
+                    None => Err(Box::new(EvalError::VariableNotFound(name.clone()))),
                 }
             }
         }

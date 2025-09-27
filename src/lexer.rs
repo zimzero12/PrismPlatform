@@ -1,5 +1,4 @@
-// in src/lexer.rs
-
+use crate::error::{ParseError, TraceResult};
 use crate::token::Token;
 
 pub struct Lexer {
@@ -15,44 +14,32 @@ impl Lexer {
         }
     }
 
-    pub fn next_token(&mut self) -> Token {
-        // This loop is the core of the fix.
-        // It will continue to run until it finds a real token or hits the end of the file.
-        loop {
-            // First, skip any whitespace (spaces, newlines, etc.)
-            self.skip_whitespace();
+    pub fn next_token(&mut self) -> TraceResult<Token> {
+        self.skip_whitespace();
 
-            // Check if we're at the end of the source code.
-            if self.position >= self.source.len() {
-                return Token::EndOfFile;
-            }
-
-            // Check for comments. If we find one, skip it and loop again.
-            if self.source[self.position] == '#' {
-                self.skip_comment();
-                continue; // Go back to the start of the loop
-            }
-
-            // If it's not whitespace and not a comment, it must be a real token.
-            // Break the loop and proceed to the token parsing logic below.
-            break;
+        if self.position >= self.source.len() {
+            return Ok(Token::EndOfFile);
         }
 
         let current_char = self.source[self.position];
 
-        // This token parsing logic remains the same.
-        let token = match current_char {
+        match current_char {
             '=' => {
                 self.position += 1;
-                Token::Equals
+                Ok(Token::Equals)
             }
-            '"' => self.read_text(),
-            _ if current_char.is_alphabetic() => self.read_identifier(),
+            '"' => Ok(self.read_text()),
+            '#' => {
+                self.skip_comment();
+                self.next_token()
+            }
+            _ if current_char.is_alphabetic() => Ok(self.read_identifier()),
             _ if current_char.is_digit(10) => self.read_number(),
-            _ => Token::EndOfFile,
-        };
-
-        token
+            _ => {
+                self.position += 1;
+                Ok(Token::EndOfFile)
+            }
+        }
     }
 
     fn skip_whitespace(&mut self) {
@@ -61,7 +48,6 @@ impl Lexer {
         }
     }
 
-    // This function now skips until it finds a newline character.
     fn skip_comment(&mut self) {
         while self.position < self.source.len() && self.source[self.position] != '\n' {
             self.position += 1;
@@ -82,13 +68,31 @@ impl Lexer {
         }
     }
 
-    fn read_number(&mut self) -> Token {
+    // THIS IS THE CORRECTED FUNCTION
+    fn read_number(&mut self) -> TraceResult<Token> {
         let start = self.position;
         while self.position < self.source.len() && self.source[self.position].is_digit(10) {
             self.position += 1;
         }
+
+        // THE FIX: After reading digits, we peek at the next character.
+        if self.position < self.source.len() && self.source[self.position].is_alphabetic() {
+            // If it's a letter, this is an invalid token like '123abc'.
+            // We consume the rest of the invalid word to prevent partial reads.
+            while self.position < self.source.len() && self.source[self.position].is_alphanumeric() {
+                self.position += 1;
+            }
+            let invalid_str: String = self.source[start..self.position].iter().collect();
+            // And we return the error the test expects.
+            return Err(Box::new(ParseError::InvalidNumber(invalid_str)));
+        }
+
+        // If the character after the digits is not a letter, it's a valid number.
         let number_str: String = self.source[start..self.position].iter().collect();
-        Token::Number(number_str.parse().unwrap_or(0.0))
+        match number_str.parse::<f64>() {
+            Ok(num) => Ok(Token::Number(num)),
+            Err(_) => Err(Box::new(ParseError::InvalidNumber(number_str))),
+        }
     }
 
     fn read_text(&mut self) -> Token {
@@ -100,5 +104,99 @@ impl Lexer {
         let text: String = self.source[start..self.position].iter().collect();
         self.position += 1;
         Token::Text(text)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::token::Token;
+
+    #[test]
+    fn test_create_statement() -> TraceResult<()> {
+        let source = "create score = 100";
+        let mut lexer = Lexer::new(source.to_string());
+
+        let expected_tokens = vec![
+            Token::Create,
+            Token::Identifier("score".to_string()),
+            Token::Equals,
+            Token::Number(100.0),
+            Token::EndOfFile,
+        ];
+
+        for expected in expected_tokens {
+            assert_eq!(lexer.next_token()?, expected);
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn test_say_statement_with_text() -> TraceResult<()> {
+        let source = "say \"Hello World\"";
+        let mut lexer = Lexer::new(source.to_string());
+
+        let expected_tokens = vec![
+            Token::Say,
+            Token::Text("Hello World".to_string()),
+            Token::EndOfFile,
+        ];
+
+        for expected in expected_tokens {
+            assert_eq!(lexer.next_token()?, expected);
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn test_comments_are_skipped() -> TraceResult<()> {
+        let source = "# This is a comment\ncreate x = 10 # another comment";
+        let mut lexer = Lexer::new(source.to_string());
+
+        let expected_tokens = vec![
+            Token::Create,
+            Token::Identifier("x".to_string()),
+            Token::Equals,
+            Token::Number(10.0),
+            Token::EndOfFile,
+        ];
+
+        for expected in expected_tokens {
+            assert_eq!(lexer.next_token()?, expected);
+        }
+        Ok(())
+    }
+    
+    #[test]
+    fn test_whitespace_handling() -> TraceResult<()> {
+        let source = "  create\tname\n=\r\n\"Zim\"  ";
+        let mut lexer = Lexer::new(source.to_string());
+
+        let expected_tokens = vec![
+            Token::Create,
+            Token::Identifier("name".to_string()),
+            Token::Equals,
+            Token::Text("Zim".to_string()),
+            Token::EndOfFile,
+        ];
+
+        for expected in expected_tokens {
+            assert_eq!(lexer.next_token()?, expected);
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn test_invalid_number_returns_error() {
+        let source = "create x = 123abc";
+        let mut lexer = Lexer::new(source.to_string());
+
+        assert_eq!(lexer.next_token().unwrap(), Token::Create);
+        assert_eq!(lexer.next_token().unwrap(), Token::Identifier("x".to_string()));
+        assert_eq!(lexer.next_token().unwrap(), Token::Equals);
+
+        let result = lexer.next_token();
+        
+        assert!(result.is_err());
     }
 }

@@ -1,45 +1,78 @@
-Welcome to the official repo for Prism Platform. It's an ambitious project and our goal is to build a software ecosystem. This includes PrismOS (which we currenty have not began yet)
-and Trace which is a simple and human-readable programming language.
+# ✨ The Prism Platform ✨
 
-Developers:
-ZimZero - did every single thing you see here, including the README and every single file. This is the only developer.
+> **A disciplined journey to build a programming language and operating system from first principles.**
 
-Random Raul - his randomness doesn't apply because he doesn't do anything and just sits and doomscrolls all day.
+This repository is the home of the **Prism Platform**, an open-source educational project with two long-term goals:
 
-16 Year Old Guy - his experience doesn't apply because he's too lazy to actually do anything. 
+1. **Trace**: A simple, safe, and human-readable programming language.
+2. **PrismOS**: A clean, intuitive operating system built around Trace.
 
-Gemini 2.5 Pro - the actual developer. Wrote every single line of code.
+**But today, we are focused on one thing: making Trace a correct, testable, and complete language.**
 
 ---
 
-## 🏁 Getting Started
+## 🎯 Current Status & Roadmap
+
+We are in **Milestone v0.3**, working toward a **Turing-complete Trace interpreter** with proper error handling and a solid test suite.
+
+### ✅ Immediate Goals (v0.3)
+- [ ] Implement `if` statements and `loop` constructs  
+- [ ] Add arithmetic support (`+` operator)  
+- [ ] Replace all `unwrap`, `expect`, and silent fallbacks with explicit `Result<T, E>` error handling  
+- [ ] Make undefined variable access a **hard error**  
+- [ ] Write **20+ unit tests** covering lexer, parser, and evaluator edge cases  
+- [ ] Remove all dead code and eliminate `#![allow(dead_code)]`  
+- [ ] Publish this realistic roadmap  
+
+> 🔜 **Success criterion**: `fibonacci(10)` must run correctly in Trace.
+
+### 🌌 Long-Term Vision (Post v1.0)
+- A self-hosting Trace compiler  
+- A minimal runtime environment  
+- **Eventually**: The foundations of **PrismOS** — but **not yet**.  
+  *(Building an OS requires a stable language, a memory model, and systems expertise. We are not there.)*
+
+This project is **not a product**. It is a **public learning log**, a **demonstration of incremental engineering**, and a **monument to rigor over hype**.
+
+---
+
+## 🛠️ Getting Started
 
 ### Prerequisites
+Install the Rust toolchain using `rustup` (the official Rust installer):
 
-Make sure you have the Rust toolchain installed on your system.
-*   [Install Rust](https://www.rust-lang.org/tools/install)
+```sh
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
-### Installation & Running
+💡 On Windows? Download and run rustup-init.exe instead.
+Ensure your PATH includes ~/.cargo/bin (or %USERPROFILE%\.cargo\bin on Windows).
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/zimzero12/PrismPlatform.git
-    ```
-(The rest stays the same)
+## Running Trace
 
-### Installation & Running
+### Clone the repositories
+```sh
+git clone https://github.com/zimzero12/PrismPlatform.git
+cd PrismPlatform | sh
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/zimzero12/PrismPlatform.git
-    ```
+### Run the REPL
+```sh
+cargo run | sh
 
-2.  **Navigate into the project directory:**
-    ```bash
-    cd PrismPlatform
-    ```
+### Execute a script
+```sh
+cargo run -- your_script.trace | sh
 
-3.  **Build and run the project:**
-    '```bash
-    cargo run
-    ```
+Warning: Trace is not stable. Breaking changes are expected weekly. 
+
+## 📚 Documentation
+See DOCUMENTATION.md for the current language specification.
+
+## 🤝 Contributing & Learning
+This project is open for educational collaboration. All contributions must:
+
+Include tests
+Use explicit error handling
+Avoid dead or unused code
+We welcome issue reports, especially around edge cases in parsing or evaluation.
+
+"First, make it correct. Then, make it beautiful." 

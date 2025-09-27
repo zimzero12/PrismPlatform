@@ -32,14 +32,14 @@ Make sure you have the Rust toolchain installed on your system.
 1.  **Clone the repository:**
     ''' bash
     git clone https://github.com/zimzero12/PrismPlatform.git
-    ''' 
+    ```
 
 2.  **Navigate into the project directory:**
     ''' bash
     cd PrismPlatform
-    '''
+    ```
 
 3.  **Build and run the project:**
     ''' bash
     cargo run
-    '''
+    ```

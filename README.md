@@ -45,7 +45,7 @@ Install the Rust toolchain using `rustup` (the official Rust installer):
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs
 ```
 
-> ** 💡 On Windows? Download and run rustup-init.exe instead.
+> 💡 On Windows? Download and run rustup-init.exe instead.
 Ensure your PATH includes ~/.cargo/bin (or %USERPROFILE%\.cargo\bin on Windows).
 
 ## Running Trace
@@ -79,4 +79,4 @@ Use explicit error handling
 Avoid dead or unused code
 We welcome issue reports, especially around edge cases in parsing or evaluation.
 
-"First, make it correct. Then, make it beautiful." 
+> "First, make it correct. Then, make it beautiful." 

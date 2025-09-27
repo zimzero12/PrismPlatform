@@ -1,6 +1,6 @@
 use crate::ast::{Expression, Program, Statement};
 use crate::lexer::Lexer;
-use crate::Token;
+use crate::token::Token;
 
 pub struct Parser {
     lexer: Lexer,
@@ -21,22 +21,22 @@ impl Parser {
         self.current_token = self.lexer.next_token();
     }
 
-    pub fn parse_program(&mut self) -> Program {
-        let mut program = Program {
-            statements: Vec::new(),
-        };
+// in src/parser.rs
 
-        while self.current_token != Token::EndOfFile {
-            if let Some(statement) = self.parse_statement() {
-                program.statements.push(statement);
-            }
-            
-            // This is a simple fix to prevent infinite loops in a REPL.
-            // We only parse one statement per line.
-            break;
+pub fn parse_program(&mut self) -> Program {
+    let mut program = Program {
+        statements: Vec::new(),
+    };
+
+    // The loop now correctly continues until the very end of the file.
+    while self.current_token != Token::EndOfFile { // <-- THIS LINE IS FIXED
+        if let Some(statement) = self.parse_statement() {
+            program.statements.push(statement);
         }
-        program
+        self.next_token();
     }
+    program
+}
 
     fn parse_statement(&mut self) -> Option<Statement> {
         match self.current_token {

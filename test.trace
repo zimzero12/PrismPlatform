@@ -1,0 +1,15 @@
+# This is a program written in the Trace language!
+# (Note: The language doesn't support comments yet, so our program will ignore this line)
+
+say "--- Starting test script ---"
+
+create hero = "Zim"
+create score = 100
+create level = 1
+
+say "Welcome,"
+say hero
+say "Your score is:"
+say score
+
+say "--- Test script finished ---"

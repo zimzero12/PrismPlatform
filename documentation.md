@@ -21,3 +21,5 @@ A **text literal** is any sequence of characters enclosed in double quotes.
 **Example:**
 ```trace
 say "Hello, World!"
+
+check out documentation.md for more info.

@@ -1,22 +1,22 @@
-// in src/ast.rs
-
 #[derive(Debug)]
 pub struct Program {
     pub statements: Vec<Statement>,
 }
 
-// Represents a value or computation
-#[derive(Debug)]
+// Represents a value or computation. Added Clone to make it easier to pass around.
+#[derive(Debug, Clone)]
 pub enum Expression {
+    Identifier(String),   // For variable names like 'score'
     NumberLiteral(f64),
-    // We'll add TextLiteral, Identifier, etc. here later
+    TextLiteral(String),  // For quoted text like "Hello"
 }
 
-// Represents an action or command
+// Represents an action or command.
 #[derive(Debug)]
 pub enum Statement {
-    SayStatement { value: String },
-    CreateStatement { // <-- ADDED
+    // MODIFIED: 'value' is now an Expression, not a raw String.
+    SayStatement { value: Expression },
+    CreateStatement {
         name: String,
         value: Expression,
     },

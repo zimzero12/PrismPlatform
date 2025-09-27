@@ -1,3 +1,5 @@
+Note: This project has been shut down and it's in an unfunctional state. It's only kept for archiving purposes.
+
 # ✨ The Prism Platform ✨
 
 > **A disciplined journey to build a programming language and operating system from first principles.**
